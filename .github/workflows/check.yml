@@ -12,15 +12,40 @@ on:
       - main
 
 jobs:
+  is-org-member:
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.is-org-member.outputs.result }}
+    steps:
+      - name: Check if author is tiiuae member
+        id: is-org-member
+        uses: JamesSingleton/is-organization-member@1.0.1
+        with:
+          organization: tiiuae
+          username: ${{ github.actor }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Debug
+        shell: bash
+        run: |
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.repository: ${{ github.repository }}"
+          echo "github.event.pull_request.head.repo.full_name: ${{ github.event.pull_request.head.repo.full_name }}"
+          echo "github.actor: ${{ github.actor }}"
+          echo "github.ref: ${{ github.ref }}"
+          echo "github.event.pull_request.head.sha: ${{ github.event.pull_request.head.sha }}"
+          echo "is-org-member result: ${{ steps.is-org-member.outputs.result }}"
+
   # Authorization passes without approval if:
   # - The event is not a pull request (e.g. push to main)
   # - Pull request comes from another branch in the same repo
   # Otherwise, the workflow requires
   # manual approval from a maintainer with write permissions to continue
   authorize:
+    needs: [is-org-member]
     environment: ${{
       ( github.event_name != 'pull_request_target' ||
-        github.event.pull_request.head.repo.full_name == github.repository )
+        github.event.pull_request.head.repo.full_name == github.repository ||
+        needs.is-org-member.outputs.result == 'true' )
       && 'internal' || 'external' }}
     runs-on: ubuntu-latest
     steps:
@@ -54,18 +79,6 @@ jobs:
 
             exit 1
           fi
-
-  debug-print:
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Debug print"
-        run: |
-          echo "github.event_name: ${{ github.event_name }}"
-          echo "github.repository: ${{ github.repository }}"
-          echo "github.event.pull_request.head.repo.full_name: ${{ github.event.pull_request.head.repo.full_name }}"
-          echo "github.actor: ${{ github.actor }}"
-          echo "github.ref: ${{ github.ref }}"
-          echo "github.event.pull_request.head.sha: ${{ github.event.pull_request.head.sha }}"
 
   run-checks:
     needs: [authorize]
