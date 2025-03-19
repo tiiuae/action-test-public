@@ -1,7 +1,6 @@
 name: check
 
-permissions:
-  contents: read
+permissions: read-all
 
 on:
   push:
