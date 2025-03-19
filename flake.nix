@@ -24,7 +24,7 @@
     say-hello = pkgs.writeShellScriptBin "say-hello" ''
       set -eu
       echo "[+] Running '$(realpath "$0")'"
-      echo "Hello from action-test-public!"
+      echo "Hello from action-test-public :-)"
     '';
   in {
     # packages
