@@ -33,5 +33,13 @@
 
     # formatter
     formatter.x86_64-linux = formatter;
+
+    # checks
+    checks.x86_64-linux = {
+      hello = self.packages.x86_64-linux.hello;
+      hello-private = self.packages.x86_64-linux.hello-private;
+      fmt = self.formatter.x86_64-linux;
+    };
+
   };
 }
